@@ -365,3 +365,115 @@ function get_simpledir_list($dirpath, $urlpath, $ignore) {
     'total'   => simpledir_format_bytes($filetot),
   );
 }
+
+function get_simpledir_display($dirpath, $urlpath, $ignore) {
+  global $SITEURL;
+  
+  $simpledir_conf = array(
+    'dirpath' => $dirpath,
+    'urlpath' => $urlpath,
+    'ignore'  => $ignore,
+  );
+  
+  $list = get_simpledir_list($dirpath, $urlpath, $ignore);
+  $tmp_content = '';
+  $currentdir = "";
+
+  if((isset($_GET["subdir"])) && ($_GET["subdir"]<>''))
+    $currentdir = urldecode($_GET["subdir"]) . '/';
+
+  $current_url = explode('?', $_SERVER["REQUEST_URI"]);
+  $current_url = $current_url[0];
+
+  if ($currentdir == "") {
+    $simpledir_dir = $simpledir_conf['dirpath'];	
+  } else {
+    $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
+  }
+
+  //check for directory traversal attempt and scrub to base directory
+  if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
+    $simpledir_dir = $simpledir_conf['dirpath'];
+  }
+
+  //rebuild clean param for links
+  $currentdir = substr(realpath($simpledir_dir),strlen($simpledir_conf['dirpath']));
+  if ($currentdir<>'')
+    $currentdir = $currentdir . '/';
+    
+  $simpledir_content = '';
+
+  // display list of  files
+  $filearray = $list['files'];
+  $subdirarray = $list['subdirs'];
+
+  $simpledir_content .= '<table id="sd_table">';
+
+  if ($currentdir == "") {
+    $simpledir_content .= '<caption>Directory Listing</caption>';
+  } else {
+    $simpledir_content .= '<caption>Subdirectory Listing for ' . $currentdir . '</caption>';
+  }
+
+  $simpledir_content .= '<thead><tr><th>Name</th><th>Date</th><th>Size</th></tr></head>';
+  
+  // generate listing:
+  $simpledir_content .= '<tbody>';
+
+  $rowclass="";
+
+  // up to parent
+  if ($currentdir<>'') {
+    $parentdir = substr($currentdir, 0, strrpos($currentdir,'/',-2));
+    $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?subdir=' . urlencode($parentdir) 
+                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
+    $rowclass=' class="alt"';
+  }
+    
+
+  // subdirectories
+  $filecount = count($subdirarray);
+
+  if ($filecount > 0) {
+    sort($subdirarray);
+    foreach ($subdirarray as $file) {
+      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?subdir=' . urlencode($currentdir . $file[0]) 
+                         . '"><img src="' . $SITEURL . 'plugins/simpledir/folder.png" width="16" height="16">&nbsp;' . $file[0] . '</a></td><td colspan="2">' . $file[1] . '</td></tr>';
+      if ($rowclass=="") {
+        $rowclass=' class="alt"';
+      } else {
+        $rowclass="";
+      }
+    }
+  }      
+
+  // files
+  $filecount = count($filearray);
+
+  if ($filecount > 0) {
+    sort($filearray);
+    foreach ($filearray as $file) {
+      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $currentdir . $file[0] . '">' 
+	           . '<img src="' . $SITEURL . 'plugins/simpledir/' . $file[3] . '.png" width="16" height="16">&nbsp;' . $file[0] 
+                         . '</a></td><td>' . $file[1] . '</td><td>' . $file[2] . '</td></tr>';
+      if ($rowclass=="") {
+        $rowclass=' class="alt"';
+      } else {
+        $rowclass="";
+      }
+    }
+  }      
+
+  $simpledir_content .= '<tr' . $rowclass . '><td colspan="3">';
+
+  if ($filecount==1) {
+    $simpledir_content .= $filecount . ' file';
+  } else {
+    $simpledir_content .= $filecount . ' files';
+  }
+
+  $simpledir_content .= ' totaling ' . $list['total'] . ' </td></tr>';
+  $simpledir_content .= '</tbody></table><br />';  
+
+  return $simpledir_content;
+}
