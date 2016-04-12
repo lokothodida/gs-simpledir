@@ -300,7 +300,7 @@ function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
     $parentdir = substr($currentdir, 0, strrpos($currentdir,'/',-2));
     $query[$key] = $parentdir;
     $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
+                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
     $rowclass=' class="alt"';
   }
     
@@ -313,7 +313,7 @@ function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
     foreach ($subdirarray as $file) {
       $query[$key] = $currentdir . $file[0];
       $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '"><img src="' . $SITEURL . 'plugins/simpledir/folder.png" width="16" height="16">&nbsp;' . $file[0] . '</a></td><td colspan="2">' . $file[1] . '</td></tr>';
+                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file[0] . '</a></td><td colspan="2">' . $file[1] . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
@@ -329,7 +329,7 @@ function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
     sort($filearray);
     foreach ($filearray as $file) {
       $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $currentdir . $file[0] . '">' 
-	           . '<img src="' . $SITEURL . 'plugins/simpledir/' . $file[3] . '.png" width="16" height="16">&nbsp;' . $file[0] 
+	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file[3] . '.png" width="16" height="16">&nbsp;' . $file[0] 
                          . '</a></td><td>' . $file[1] . '</td><td>' . $file[2] . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
