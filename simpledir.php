@@ -152,7 +152,7 @@ function simpledir_display($contents)
   //
   // simpledir hook on this page
   //  
-  if ($location !== FALSE) {
+  /*if ($location !== FALSE) {
     $tmp_content = str_replace("(% simpledir %)","",$tmp_content);
    
     $start_content = substr($tmp_content, 0 ,$location);
@@ -160,9 +160,36 @@ function simpledir_display($contents)
     
     // build page
     $tmp_content = $start_content . get_simpledir_display(GSDATAUPLOADPATH, '/data/uploads/', array()) . $end_content;
-  }
+  }*/
+  $tmp_content = preg_replace_callback('/\(% simpledir(.*?)%\)/', 'simpledir_display_callback', $tmp_content);
     
   return $tmp_content;
+}
+
+function simpledir_display_callback($matches) {
+  $params = $matches[1];
+  $params = explode(' ', $params);
+  $args = array();
+
+  foreach ($params as $param) {
+    $param = explode('=', $param);
+    $key = trim($param[0]);
+    $value = isset($param[1]) ? trim(strtolower($param[1]), '"') : null;
+    $args[$key] = $value;
+  }
+
+  if (isset($args['ignore'])) {
+    $args['ignore'] = explode(',', $args['ignore']); 
+  } else {
+    $args['ignore'] = array();
+  }
+
+  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : GSDATAUPLOADPATH;
+  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : '/data/uploads/';
+  $ignore  = $args['ignore'];
+  $key     = isset($args['key']) ? $args['key']: null;
+
+  return get_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
 
 function get_simpledir_list($dirpath, $urlpath, $ignore) {
@@ -230,7 +257,7 @@ function get_simpledir_list($dirpath, $urlpath, $ignore) {
   );
 }
 
-function get_simpledir_display($dirpath, $urlpath, $ignore) {
+function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
   global $SITEURL;
   
   $simpledir_conf = array(
@@ -239,21 +266,25 @@ function get_simpledir_display($dirpath, $urlpath, $ignore) {
     'ignore'  => $ignore,
   );
   
-  $list = get_simpledir_list($dirpath, $urlpath, $ignore);
   $tmp_content = '';
   $currentdir = "";
 
-  if((isset($_GET["subdir"])) && ($_GET["subdir"]<>''))
-    $currentdir = urldecode($_GET["subdir"]) . '/';
+  if((isset($_GET[$key])) && ($_GET[$key]<>'')) {
+    $currentdir = urldecode($_GET[$key]) . '/';
+  }
 
   $current_url = explode('?', $_SERVER["REQUEST_URI"]);
   $current_url = $current_url[0];
+  $query = array_merge(array(), $_GET);
+  unset($query['id']);
 
   if ($currentdir == "") {
     $simpledir_dir = $simpledir_conf['dirpath'];	
   } else {
     $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
   }
+  
+  $list = get_simpledir_list($simpledir_dir, $urlpath, $ignore);
 
   //check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
@@ -289,7 +320,8 @@ function get_simpledir_display($dirpath, $urlpath, $ignore) {
   // up to parent
   if ($currentdir<>'') {
     $parentdir = substr($currentdir, 0, strrpos($currentdir,'/',-2));
-    $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?subdir=' . urlencode($parentdir) 
+    $query[$key] = $parentdir;
+    $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
                          . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
     $rowclass=' class="alt"';
   }
@@ -301,7 +333,8 @@ function get_simpledir_display($dirpath, $urlpath, $ignore) {
   if ($filecount > 0) {
     sort($subdirarray);
     foreach ($subdirarray as $file) {
-      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?subdir=' . urlencode($currentdir . $file[0]) 
+      $query[$key] = $currentdir . $file[0];
+      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
                          . '"><img src="' . $SITEURL . 'plugins/simpledir/folder.png" width="16" height="16">&nbsp;' . $file[0] . '</a></td><td colspan="2">' . $file[1] . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
