@@ -300,4 +300,68 @@ function simpledir_display($contents)
     
   return $tmp_content;
 }
-?>
+
+function get_simpledir_list($dirpath, $urlpath, $ignore) {
+  global $SITEURL; 
+
+  $simpledir_conf = array(
+    'dirpath' => $dirpath,
+    'urlpath' => $urlpath,
+    'ignore'  => $ignore,
+  );
+
+  $currentdir = "";
+
+  if((isset($_GET["subdir"])) && ($_GET["subdir"]<>'')) {
+    $currentdir = urldecode($_GET["subdir"]) . '/';
+  }
+
+  $current_url = explode('?', $_SERVER["REQUEST_URI"]);
+  $current_url = $current_url[0];
+
+  if ($currentdir == "") {
+    $simpledir_dir = $simpledir_conf['dirpath'];	
+  } else {
+    $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
+  }
+  
+  // check for directory traversal attempt and scrub to base directory
+  if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
+    $simpledir_dir = $simpledir_conf['dirpath'];
+  }
+
+  //rebuild clean param for links
+  $currentdir = substr(realpath($simpledir_dir),strlen($simpledir_conf['dirpath']));
+  if ($currentdir<>'') {
+    $currentdir = $currentdir . '/';
+  }
+
+  // display list of  files
+  $dir_handle  = @opendir($simpledir_dir) or exit('Unable to open the folder ' . $simpledir_dir . ', check the folder privileges.');
+  $filearray   = array();
+  $subdirarray = array();
+
+  // get files
+  $filetot = 0;
+
+  while ($filename = readdir($dir_handle)) {
+    // ignore dot files.
+    if (substr($filename,0,1) <> '.') {
+      // if directory
+      if (is_dir($simpledir_dir.$filename)) {
+        $subdirarray [] = array($filename, date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)));  
+      } elseif (!in_array(strtolower(substr(strrchr($filename,'.'),1)), $simpledir_conf['ignore'])) {
+        $filesize = filesize($simpledir_dir.$filename);
+        $filearray [] = array($filename, date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)), 
+                              simpledir_format_bytes($filesize), strtolower(substr(strrchr($filename,'.'),1)) );
+        $filetot += $filesize;
+      }
+    }
+  }
+
+  return array(
+    'files'   => $filearray,
+    'subdirs' => $subdirarray,
+    'total'   => simpledir_format_bytes($filetot),
+  );
+}
