@@ -140,30 +140,8 @@ function simpledir_config() {
 * Frontend display
 *
 ***********************************************************************************/
-function simpledir_display($contents)
-{  
-  global $SITEURL; 
-  global $simpledir_conf;
-  
-  $tmp_content = $contents;
-
-  $location = stripos($tmp_content,'(% simpledir %)');
-  
-  //
-  // simpledir hook on this page
-  //  
-  /*if ($location !== FALSE) {
-    $tmp_content = str_replace("(% simpledir %)","",$tmp_content);
-   
-    $start_content = substr($tmp_content, 0 ,$location);
-    $end_content = substr($tmp_content, $location, strlen($tmp_content)-$location );   
-    
-    // build page
-    $tmp_content = $start_content . get_simpledir_display(GSDATAUPLOADPATH, '/data/uploads/', array()) . $end_content;
-  }*/
-  $tmp_content = preg_replace_callback('/\(% simpledir(.*?)%\)/', 'simpledir_display_callback', $tmp_content);
-    
-  return $tmp_content;
+function simpledir_display($contents) {
+  return preg_replace_callback('/\(% simpledir(.*?)%\)/', 'simpledir_display_callback', $contents);
 }
 
 function simpledir_display_callback($matches) {
