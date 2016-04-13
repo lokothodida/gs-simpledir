@@ -352,3 +352,7 @@ function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') 
 
   return $simpledir_content;
 }
+
+function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
+  echo return_simpledir_display($dirpath, $urlpath, $ignore, $key);
+}
