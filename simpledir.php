@@ -158,7 +158,7 @@ function simpledir_config() {
 *
 ***********************************************************************************/
 function simpledir_display($contents) {
-  return preg_replace_callback('/\(% simpledir(.*?)%\)/', 'simpledir_display_callback', $contents);
+  return preg_replace_callback('/\(% simpledir(.*?)%\)/i', 'simpledir_display_callback', $contents);
 }
 
 function simpledir_display_callback($matches) {
