@@ -228,11 +228,18 @@ function return_simpledir_results($dirpath, $urlpath, $ignore) {
     if (substr($filename,0,1) <> '.') {
       // if directory
       if (is_dir($simpledir_dir.$filename)) {
-        $subdirarray [] = array($filename, date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)));  
+        $subdirarray[] = array(
+          'name' => $filename,
+          'date' => date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)),
+        );
       } elseif (!in_array(strtolower(substr(strrchr($filename,'.'),1)), $simpledir_conf['ignore'])) {
         $filesize = filesize($simpledir_dir.$filename);
-        $filearray [] = array($filename, date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)), 
-                              simpledir_format_bytes($filesize), strtolower(substr(strrchr($filename,'.'),1)) );
+        $filearray[] = array(
+          'name' => $filename,
+          'date' => date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)),
+          'size' => simpledir_format_bytes($filesize),
+          'type' => strtolower(substr(strrchr($filename,'.'),1))
+        );
         $filetot += $filesize;
       }
     }
@@ -324,9 +331,9 @@ function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') 
   if ($filecount > 0) {
     sort($subdirarray);
     foreach ($subdirarray as $file) {
-      $query[$key] = $currentdir . $file[0];
+      $query[$key] = $currentdir . $file['name'];
       $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file[0] . '</a></td><td colspan="2">' . $file[1] . '</td></tr>';
+                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td><td colspan="2">' . $file['date'] . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
@@ -341,9 +348,9 @@ function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') 
   if ($filecount > 0) {
     sort($filearray);
     foreach ($filearray as $file) {
-      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $currentdir . $file[0] . '">' 
-	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file[3] . '.png" width="16" height="16">&nbsp;' . $file[0] 
-                         . '</a></td><td>' . $file[1] . '</td><td>' . $file[2] . '</td></tr>';
+      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $currentdir . $file['name'] . '">'
+	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
+                         . '</a></td><td>' . $file['date'] . '</td><td>' . $file['size'] . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
