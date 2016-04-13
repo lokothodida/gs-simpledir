@@ -121,7 +121,16 @@ function simpledir_config() {
 	
     simpledir_saveconf();
     $simpledir_conf = simpledir_loadconf();
-    echo '<div style="display: block;" class="updated">' . i18n_r('SETTINGS_UPDATED') . '.</div>';
+
+    echo
+    '<script type="text/javascript">
+      $(function() {
+        var msg = ' . json_encode(i18n_r('SETTINGS_UPDATED')) . ';
+        $("div.bodycontent").before(
+          "<div class=\"updated\" style=\"display:block;\">" + msg + "</div>");
+        $(".updated, .error").fadeOut(500).fadeIn(500);
+      });
+    </script>';
   }
 
   echo '<h3>SimpleDir Plugin Settings</h3>';
