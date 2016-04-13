@@ -188,6 +188,12 @@ function simpledir_display_callback($matches) {
   return return_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
 
+/***********************************************************************************
+*
+* Public Functions
+*
+***********************************************************************************/
+// Get an array of the files/subdirs in a directory
 function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array()) {
   global $SITEURL; 
 
@@ -268,6 +274,7 @@ function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = ar
   );
 }
 
+// Return the HTML table of files in a directory
 function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   global $SITEURL;
 
@@ -389,6 +396,7 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
   return $simpledir_content;
 }
 
+// Print the HTML table of the files in a directory
 function get_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   echo return_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
