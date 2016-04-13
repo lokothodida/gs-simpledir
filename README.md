@@ -31,7 +31,7 @@ Additional parameters for the `(% simpledir %)` shortcode:
 * `dirpath`: path relative to global path given in the admin panel.
 * `urlpath`: path relative to the global URL path for the subdirectories.
 * `ignore`: comma separated list (no spaces) of extensions to ignore, e.g. `php,htaccess`.  Leave empty to use value given in admin panel.
-* `key`: alphanumeric identifier to distinguish this instance of SimpleDir, e.g. `subdir2`. Needed if you have multiple instances of SimpleDir on the same page.
+* `key`: alphanumeric identifier (used in the URL query string) to distinguish this instance of SimpleDir, e.g. `subdir2`. Needed if you have multiple instances of SimpleDir on the same page.
 
 ### Example
 ```
