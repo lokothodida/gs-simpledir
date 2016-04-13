@@ -167,10 +167,10 @@ function simpledir_display_callback($matches) {
   $ignore  = $args['ignore'];
   $key     = isset($args['key']) ? $args['key']: null;
 
-  return get_simpledir_display($dirpath, $urlpath, $ignore, $key);
+  return return_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
 
-function get_simpledir_list($dirpath, $urlpath, $ignore) {
+function return_simpledir_results($dirpath, $urlpath, $ignore) {
   global $SITEURL; 
 
   $simpledir_conf = array(
@@ -235,7 +235,7 @@ function get_simpledir_list($dirpath, $urlpath, $ignore) {
   );
 }
 
-function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
+function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
   global $SITEURL;
   
   $simpledir_conf = array(
@@ -262,7 +262,7 @@ function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
     $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
   }
   
-  $list = get_simpledir_list($simpledir_dir, $urlpath, $ignore);
+  $list = return_simpledir_results($simpledir_dir, $urlpath, $ignore);
 
   //check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
