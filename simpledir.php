@@ -1,14 +1,14 @@
 <?php
 /*
-Plugin Name: SimpleDir
-Description: a GetSimple CMS plugin to provide directory listings
-Version: 0.3
-Author: Rob Antonishen
-Author URI: http://ffaat.poweredbyclear.com/
+  Plugin Name: SimpleDir
+  Description: a GetSimple CMS plugin to provide directory listings
+  Version: 0.4
+  Author: Rob Antonishen (updated by Lawrence Okoth-Odida)
+  Author URI: http://ffaat.poweredbyclear.com/
 */
 
 // get correct id for plugin
-$thisfile=basename(__FILE__, ".php");
+$thisfile = basename(__FILE__, '.php');
 
 // register plugin
 register_plugin(
@@ -35,11 +35,10 @@ add_action('plugins-sidebar','createSideMenu',array($thisfile,'SimpleDir Setting
 *
 ***********************************************************************************/
 
-function simpledir_format_bytes($size) 
-{
-    $units = array('B', 'KB', 'MB', 'GB', 'TB');
-    for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
-    return round($size, 2).$units[$i];
+function simpledir_format_bytes($size) {
+  $units = array('B', 'KB', 'MB', 'GB', 'TB');
+  for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
+  return round($size, 2).$units[$i];
 }
 
 /***********************************************************************************
