@@ -175,9 +175,9 @@ function simpledir_display_callback($matches) {
   }
 
 
-  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : $simpledir_conf['dirpath'];
-  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : $simpledir_conf['urlpath'];
-  $ignore  = isset($args['ignore']) ? $args['ignore'] : $simpledir_conf['ignore'];
+  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : null;
+  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : null;
+  $ignore  = isset($args['ignore']) ? $args['ignore'] : array();
 
   if (is_string($ignore)) {
     $ignore = explode(',', $ignore);
@@ -188,7 +188,7 @@ function simpledir_display_callback($matches) {
   return return_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
 
-function return_simpledir_results($dirpath, $urlpath, $ignore) {
+function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array()) {
   global $SITEURL; 
 
   $simpledir_conf = array(
@@ -260,15 +260,23 @@ function return_simpledir_results($dirpath, $urlpath, $ignore) {
   );
 }
 
-function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
+function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   global $SITEURL;
   
-  $simpledir_conf = array(
-    'dirpath' => $dirpath,
-    'urlpath' => $urlpath,
-    'ignore'  => $ignore,
-  );
-  
+  // Copy the global $simpledir_conf
+  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
+
+  // Merge defaults
+  if (!empty($dirpath)) {
+    $simpledir_conf['dirpath'] .= $dirpath;
+  }
+
+  if (!empty($urlpath)) {
+    $simpledir_conf['urlpath'] .= $urlpath;
+  }
+
+  $simpledir_conf['ignore'] = $ignore;
+
   $tmp_content = '';
   $currentdir = "";
 
@@ -381,6 +389,6 @@ function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') 
   return $simpledir_content;
 }
 
-function get_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') {
+function get_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   echo return_simpledir_display($dirpath, $urlpath, $ignore, $key);
 }
