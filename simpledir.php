@@ -14,7 +14,7 @@ $thisfile=basename(__FILE__, ".php");
 register_plugin(
   $thisfile,
   'SimpleDir',
-  '0.3',
+  '0.4',
   'Rob Antonishen',
   'http://ffaat.poweredbyclear.com/',
   'Provides a simple directory listing',
@@ -54,7 +54,7 @@ function simpledir_loadconf() {
   $configfile=GSDATAOTHERPATH . 'simpledir.xml';
   if (!file_exists($configfile)) {
     //default settings
-    $xml_root = new SimpleXMLElement('<settings><dirpath>/home/cartocop/testbed/data/uploads/</dirpath><urlpath>/data/uploads/</urlpath><ignore>php</ignore></settings>');
+    $xml_root = new SimpleXMLElement('<settings><dirpath>' . GSDATAUPLOADPATH . '</dirpath><urlpath>' . str_replace(GSROOTPATH, '', '/' . GSDATAUPLOADPATH) . '</urlpath><ignore>php</ignore></settings>');
     if ($xml_root->asXML($configfile) === FALSE) {
 	  exit('Error saving ' . $configfile . ', check folder privlidges.');
     }
@@ -73,6 +73,14 @@ function simpledir_loadconf() {
     $vals['dirpath'] = (string)$node->dirpath;
     $vals['urlpath'] = (string)$node->urlpath;
     $vals['ignore'] =  explode(',', (string)$node->ignore);
+
+    if (empty($vals['dirpath'])) {
+      $vals['dirpath'] = GSDATAUPLOADPATH;
+    }
+    
+    if (empty($vals['urlpath'])) {
+      $vals['urlpath'] = '/' . str_replace(GSROOTPATH, '', GSDATAUPLOADPATH);
+    }
   }
   return($vals);
 }
@@ -113,20 +121,21 @@ function simpledir_config() {
     }
 	
     simpledir_saveconf();
+    $simpledir_conf = simpledir_loadconf();
     echo '<div style="display: block;" class="updated">' . i18n_r('SETTINGS_UPDATED') . '.</div>';
   }
 
-  echo '<h3 class="floated">SimpleDir Plugin Settings</h3><br/><br/>';
+  echo '<h3>SimpleDir Plugin Settings</h3>';
   echo '<form name="settings" action="load.php?id=simpledir" method="post">';
   
   echo '<label>Full Server Path to Directory (example <i>/home/user/data/uploads/):</i></label>';
-  echo '<p><input name="dirpath" type="text" size="90" value="' . $simpledir_conf['dirpath'] .'"></p>';      
+  echo '<p><input class="text" name="dirpath" type="text" size="90" value="' . $simpledir_conf['dirpath'] .'"></p>';      
 
   echo '<label>Base URL for Directory (example <i>/data/uploads/)</i>:</label>';
-  echo '<p><input name="urlpath" type="text" size="90" value="' . $simpledir_conf['urlpath'] .'"></p>';      
+  echo '<p><input class="text" name="urlpath" type="text" size="90" value="' . $simpledir_conf['urlpath'] .'"></p>';      
   
-  echo '<label>Extensions to Ignore (comma separated, no spaces. Example <i>php,txt</i>:</label><p>';
-  echo '<p><input name="ignore" type="text" size="90" value="' . implode(',',$simpledir_conf['ignore']) .'"></p>';   
+  echo '<label>Extensions to Ignore (comma separated, no spaces. Example <i>php,txt</i>:</label>';
+  echo '<p><input class="text" name="ignore" type="text" size="90" value="' . implode(',',$simpledir_conf['ignore']) .'"></p>';   
 
       
   echo "<input name='submit_settings' class='submit' type='submit' value='" . i18n_r('BTN_SAVESETTINGS') . "'><br />";
@@ -145,6 +154,7 @@ function simpledir_display($contents) {
 }
 
 function simpledir_display_callback($matches) {
+  global $simpledir_conf;
   $params = $matches[1];
   $params = explode(' ', $params);
   $args = array();
@@ -156,15 +166,15 @@ function simpledir_display_callback($matches) {
     $args[$key] = $value;
   }
 
-  if (isset($args['ignore'])) {
-    $args['ignore'] = explode(',', $args['ignore']); 
-  } else {
-    $args['ignore'] = array();
-  }
 
-  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : GSDATAUPLOADPATH;
-  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : '/data/uploads/';
-  $ignore  = $args['ignore'];
+  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : $simpledir_conf['dirpath'];
+  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : $simpledir_conf['urlpath'];
+  $ignore  = isset($args['ignore']) ? $args['ignore'] : $simpledir_conf['ignore'];
+
+  if (is_string($ignore)) {
+    $ignore = explode(',', $ignore);
+  }
+  
   $key     = isset($args['key']) ? $args['key']: null;
 
   return return_simpledir_display($dirpath, $urlpath, $ignore, $key);
@@ -254,7 +264,10 @@ function return_simpledir_display($dirpath, $urlpath, $ignore, $key = 'subdir') 
   $current_url = explode('?', $_SERVER["REQUEST_URI"]);
   $current_url = $current_url[0];
   $query = array_merge(array(), $_GET);
-  unset($query['id']);
+
+  if (isset($query['id'])) {
+    unset($query['id']);
+  }
 
   if ($currentdir == "") {
     $simpledir_dir = $simpledir_conf['dirpath'];	
