@@ -191,11 +191,19 @@ function simpledir_display_callback($matches) {
 function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array()) {
   global $SITEURL; 
 
-  $simpledir_conf = array(
-    'dirpath' => $dirpath,
-    'urlpath' => $urlpath,
-    'ignore'  => $ignore,
-  );
+  // Copy the global $simpledir_conf
+  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
+
+  // Merge defaults
+  if (!empty($dirpath)) {
+    $simpledir_conf['dirpath'] .= $dirpath;
+  }
+
+  if (!empty($urlpath)) {
+    $simpledir_conf['urlpath'] .= $urlpath;
+  }
+
+  $simpledir_conf['ignore'] = $ignore;
 
   $currentdir = "";
 
@@ -262,20 +270,12 @@ function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = ar
 
 function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   global $SITEURL;
-  
-  // Copy the global $simpledir_conf
-  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
 
-  // Merge defaults
-  if (!empty($dirpath)) {
-    $simpledir_conf['dirpath'] .= $dirpath;
-  }
-
-  if (!empty($urlpath)) {
-    $simpledir_conf['urlpath'] .= $urlpath;
-  }
-
-  $simpledir_conf['ignore'] = $ignore;
+  $simpledir_conf = array(
+    'dirpath' => $dirpath,
+    'urlpath' => $urlpath,
+    'ignore'  => $ignore
+  );
 
   $tmp_content = '';
   $currentdir = "";
