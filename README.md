@@ -39,7 +39,7 @@ Additional parameters for the `(% simpledir %)` shortcode:
 (% simpledir key="subdir1" %)
 
 // Shows all files in /data/uploads/images
-(% simpledir key="subdir2" dirpath="images/" %)
+(% simpledir key="subdir2" dirpath="images/" urlpath="images/" %)
 
 // Shows all non-png files in data/uploads/
 (% simpledir key="subdir3" ignore="png" %)
@@ -47,15 +47,21 @@ Additional parameters for the `(% simpledir %)` shortcode:
 
 # API
 ## Display functions
-* `get_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir')`: prints out a table of the contents of `$dirpath`.
-  * `$dirpath`: same as `dirpath` above.
-  * `$urlpath`: same as `urlpath` above.
-  * `$ignore`: array of extensions to ignore, e.g. `array('php', 'htaccess')` 
-  * `$key`: same as `key` above.
+* `get_simpledir_display($params = array())`: prints out a table of the contents of `$dirpath`.
+  `$params` is an array with the following keys:
+  * `dirpath`: same as `dirpath` above.
+  * `urlpath`: same as `urlpath` above.
+  * `ignore`: array of extensions to ignore, e.g. `array('php', 'htaccess')`
+  * `key`: same as `key` above.
 
 ## Public functions
-* `return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir')`: returns a string of the table.
-* `return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array())`: returns an array of the contents of `$dirpath` with the following keys:
-  * `subdirs` : array of subdirectories; each an associative array with keys `name`, `date`
-  * `files`: array of files, each an associative array with keys `name`, `date`, `size`, `type`
-  * `total`: total size of the files in this directory
+* `return_simpledir_display($params = array())`: returns a string of the table. Same arguments as `get_simpledir_display`
+* `return_simpledir_results($params = array())` : returns an array of the contents of a given directory
+  * `$params` is an array with the following parameters:
+    * `dirpath`: same as `dirpath` above.
+    * `urlpath`: same as `urlpath` above.
+    * `ignore`: same as `ignore` above.
+  * Returned is an array with the following keys:
+    * `subdirs` : array of subdirectories; each an associative array with keys `name`, `date`
+    * `files`: array of files, each an associative array with keys `name`, `date`, `size`, `type`
+    * `total`: total size of the files in this directory

@@ -174,18 +174,23 @@ function simpledir_display_callback($matches) {
     $args[$key] = $value;
   }
 
-
-  $dirpath = isset($args['dirpath']) ? $args['dirpath'] : null;
-  $urlpath = isset($args['urlpath']) ? $args['urlpath'] : null;
-  $ignore  = isset($args['ignore']) ? $args['ignore'] : array();
-
-  if (is_string($ignore)) {
-    $ignore = explode(',', $ignore);
+  if (isset($args['dirpath'])) {
+    $params['dirpath'] = $args['dirpath'];
   }
-  
-  $key     = isset($args['key']) ? $args['key']: null;
 
-  return return_simpledir_display($dirpath, $urlpath, $ignore, $key);
+  if (isset($args['urlpath'])) {
+    $params['urlpath'] = $args['urlpath'];
+  }
+
+  if (isset($args['ignore'])) {
+    $params['ignore'] = explode(',', $args['ignore']);
+  }
+
+  if (isset($args['key'])) {
+    $params['key'] = $args['key'];
+  }
+
+  return return_simpledir_display($params);
 }
 
 /***********************************************************************************
@@ -194,7 +199,18 @@ function simpledir_display_callback($matches) {
 *
 ***********************************************************************************/
 // Get an array of the files/subdirs in a directory
-function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array()) {
+function return_simpledir_results($params = array()) {
+  // Default parameters
+  $params = array_merge(array(
+    'dirpath' => null,
+    'urlpath' => null,
+    'ignore'  => array()
+  ), $params);
+
+  $dirpath = $params['dirpath'];
+  $urlpath = $params['urlpath'];
+  $ignore  = $params['ignore'];
+
   // Copy the global $simpledir_conf
   $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
 
@@ -260,17 +276,23 @@ function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = ar
 }
 
 // Return the HTML table of files in a directory
-function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
+function return_simpledir_display($params = array()) {
   global $SITEURL;
 
+  // Default parameters
+  $params = array_merge(array(
+    'dirpath' => null,
+    'urlpath' => null,
+    'ignore'  => array(),
+    'key'     => 'subdir',
+  ), $params);
+
+  $dirpath = $params['dirpath'];
+  $urlpath = $params['urlpath'];
+  $ignore  = $params['ignore'];
+  $key     = $params['key'];
+
   $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
-  /*
-  $simpledir_conf = array(
-    'dirpath' => $dirpath,
-    'urlpath' => $urlpath,
-    'ignore'  => $ignore
-  );
-  */
   $simpledir_conf['ignore'] = $ignore;
 
   $tmp_content = '';
@@ -300,7 +322,11 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
     $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
   }
 
-  $list = return_simpledir_results($dirpath . $currentdir, $urlpath, $ignore);
+  $list = return_simpledir_results(array(
+    'dirpath' => $dirpath . $currentdir,
+    'urlpath' => $urlpath,
+    'ignore'  => $ignore,
+  ));
 
   //check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
@@ -392,7 +418,12 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
   return $simpledir_content;
 }
 
+/***********************************************************************************
+*
+* Display Functions
+*
+***********************************************************************************/
 // Print the HTML table of the files in a directory
-function get_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
-  echo return_simpledir_display($dirpath, $urlpath, $ignore, $key);
+function get_simpledir_display($params = array()) {
+  echo return_simpledir_display($params);
 }
