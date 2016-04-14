@@ -195,8 +195,6 @@ function simpledir_display_callback($matches) {
 ***********************************************************************************/
 // Get an array of the files/subdirs in a directory
 function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = array()) {
-  global $SITEURL; 
-
   // Copy the global $simpledir_conf
   $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
 
@@ -211,21 +209,8 @@ function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = ar
 
   $simpledir_conf['ignore'] = $ignore;
 
-  $currentdir = "";
+  $simpledir_dir = $simpledir_conf['dirpath'];
 
-  if((isset($_GET["subdir"])) && ($_GET["subdir"]<>'')) {
-    $currentdir = urldecode($_GET["subdir"]) . '/';
-  }
-
-  $current_url = explode('?', $_SERVER["REQUEST_URI"]);
-  $current_url = $current_url[0];
-
-  if ($currentdir == "") {
-    $simpledir_dir = $simpledir_conf['dirpath'];	
-  } else {
-    $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
-  }
-  
   // check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
     $simpledir_dir = $simpledir_conf['dirpath'];
@@ -278,11 +263,15 @@ function return_simpledir_results($dirpath = null, $urlpath = null, $ignore = ar
 function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = array(), $key = 'subdir') {
   global $SITEURL;
 
+  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
+  /*
   $simpledir_conf = array(
     'dirpath' => $dirpath,
     'urlpath' => $urlpath,
     'ignore'  => $ignore
   );
+  */
+  $simpledir_conf['ignore'] = $ignore;
 
   $tmp_content = '';
   $currentdir = "";
@@ -293,7 +282,13 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
 
   $current_url = explode('?', $_SERVER["REQUEST_URI"]);
   $current_url = $current_url[0];
-  $query = array_merge(array(), $_GET);
+
+  // Copy the $_GET parameters to a new variable (used for generating full url correctly)
+  $query = array();
+
+  foreach ($_GET as $k => $v) {
+    $query[$k] = $v;
+  }
 
   if (isset($query['id'])) {
     unset($query['id']);
@@ -304,19 +299,18 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
   } else {
     $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
   }
-  
-  $list = return_simpledir_results($simpledir_dir, $urlpath, $ignore);
+
+  $list = return_simpledir_results($dirpath . $currentdir, $urlpath, $ignore);
 
   //check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
     $simpledir_dir = $simpledir_conf['dirpath'];
   }
 
-  //rebuild clean param for links
-  $currentdir = substr(realpath($simpledir_dir),strlen($simpledir_conf['dirpath']));
-  if ($currentdir<>'')
-    $currentdir = $currentdir . '/';
-    
+  if ($currentdir<>'') {
+    $currentdir = rtrim($currentdir, '/') . '/';
+  }
+
   $simpledir_content = '';
 
   // display list of  files
@@ -340,7 +334,9 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
 
   // up to parent
   if ($currentdir<>'') {
-    $parentdir = substr($currentdir, 0, strrpos($currentdir,'/',-2));
+    $parentdir = dirname($currentdir);
+    $parentdir = ($parentdir == '.') ? '' : $parentdir;
+
     $query[$key] = $parentdir;
     $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
                          . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
@@ -371,7 +367,7 @@ function return_simpledir_display($dirpath = null, $urlpath = null, $ignore = ar
   if ($filecount > 0) {
     sort($filearray);
     foreach ($filearray as $file) {
-      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $currentdir . $file['name'] . '">'
+      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
 	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
                          . '</a></td><td>' . $file['date'] . '</td><td>' . $file['size'] . '</td></tr>';
       if ($rowclass=="") {
