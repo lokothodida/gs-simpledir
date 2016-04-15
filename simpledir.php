@@ -190,6 +190,10 @@ function simpledir_display_callback($matches) {
     $params['key'] = $args['key'];
   }
 
+  if (isset($args['order'])) {
+    $params['order'] = $args['order'];
+  }
+
   return return_simpledir_display($params);
 }
 
@@ -204,7 +208,8 @@ function return_simpledir_results($params = array()) {
   $params = array_merge(array(
     'dirpath' => null,
     'urlpath' => null,
-    'ignore'  => array()
+    'ignore'  => array(),
+    'order'   => '+name',
   ), $params);
 
   $dirpath = $params['dirpath'];
@@ -254,13 +259,15 @@ function return_simpledir_results($params = array()) {
         $subdirarray[] = array(
           'name' => $filename,
           'date' => date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)),
+          'size' => null,
+          'type' => 'directory'
         );
       } elseif (!in_array(strtolower(substr(strrchr($filename,'.'),1)), $simpledir_conf['ignore'])) {
         $filesize = filesize($simpledir_dir.$filename);
         $filearray[] = array(
           'name' => $filename,
           'date' => date("Y/m/d H:i:s", filemtime($simpledir_dir.$filename)),
-          'size' => simpledir_format_bytes($filesize),
+          'size' => $filesize,
           'type' => strtolower(substr(strrchr($filename,'.'),1))
         );
         $filetot += $filesize;
@@ -268,10 +275,33 @@ function return_simpledir_results($params = array()) {
     }
   }
 
+  // Sort the files
+  $order = $params['order'];
+  $asc   = substr($order, 0, 1);
+
+  if ($asc == '+' || $asc == '-') {
+    $order = substr($order, 1);
+  } else {
+    $asc = '+';
+  }
+
+  // Build a callback function to pass to usort
+  if ($order == 'size') {
+    $callback = 'return $a["size"] - $b["size"];';
+  } elseif ($order == 'date') {
+    $callback = 'return strtotime($a["date"]) - strtotime($b["date"]);';
+  } else {
+    $callback = 'return strcmp($a["name"], $b["name"]);';
+  }
+
+  $sortcallback = create_function(($asc == '+' ? '$a, $b' : '$b, $a'), $callback);
+  usort($filearray, $sortcallback);
+  usort($subdirarray, $sortcallback);
+
   return array(
     'files'   => $filearray,
     'subdirs' => $subdirarray,
-    'total'   => simpledir_format_bytes($filetot),
+    'total'   => $filetot,
   );
 }
 
@@ -322,11 +352,11 @@ function return_simpledir_display($params = array()) {
     $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
   }
 
-  $list = return_simpledir_results(array(
+  $list = return_simpledir_results(array_merge($params, array(
     'dirpath' => $dirpath . $currentdir,
     'urlpath' => $urlpath,
     'ignore'  => $ignore,
-  ));
+  )));
 
   //check for directory traversal attempt and scrub to base directory
   if (strpos(realpath($simpledir_dir),$simpledir_conf['dirpath']) !== 0) {
@@ -374,7 +404,6 @@ function return_simpledir_display($params = array()) {
   $filecount = count($subdirarray);
 
   if ($filecount > 0) {
-    sort($subdirarray);
     foreach ($subdirarray as $file) {
       $query[$key] = $currentdir . $file['name'];
       $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
@@ -391,11 +420,10 @@ function return_simpledir_display($params = array()) {
   $filecount = count($filearray);
 
   if ($filecount > 0) {
-    sort($filearray);
     foreach ($filearray as $file) {
       $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
 	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
-                         . '</a></td><td>' . $file['date'] . '</td><td>' . $file['size'] . '</td></tr>';
+                         . '</a></td><td>' . $file['date'] . '</td><td>' . simpledir_format_bytes($file['size']) . '</td></tr>';
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
@@ -412,7 +440,7 @@ function return_simpledir_display($params = array()) {
     $simpledir_content .= $filecount . ' files';
   }
 
-  $simpledir_content .= ' totaling ' . $list['total'] . ' </td></tr>';
+  $simpledir_content .= ' totaling ' . simpledir_format_bytes($list['total']) . ' </td></tr>';
   $simpledir_content .= '</tbody></table><br />';  
 
   return $simpledir_content;
