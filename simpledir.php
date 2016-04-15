@@ -19,7 +19,7 @@ register_plugin(
   'http://ffaat.poweredbyclear.com/',
   'Provides a simple directory listing',
   'plugins',
-  'simpledir_config'  
+  'simpledir_config'
 );
 
 # global vars
@@ -65,10 +65,10 @@ function simpledir_loadconf() {
   }
 
   $xml_root = simplexml_load_file($configfile);
-  
+
   if ($xml_root !== FALSE) {
     $node = $xml_root->children();
-  
+
     $vals['dirpath'] = (string)$node->dirpath;
     $vals['urlpath'] = (string)$node->urlpath;
     $vals['ignore'] =  explode(',', (string)$node->ignore);
@@ -76,7 +76,7 @@ function simpledir_loadconf() {
     if (empty($vals['dirpath'])) {
       $vals['dirpath'] = GSDATAUPLOADPATH;
     }
-    
+
     if (empty($vals['urlpath'])) {
       $vals['urlpath'] = '/' . str_replace(GSROOTPATH, '', GSDATAUPLOADPATH);
     }
@@ -93,7 +93,7 @@ function simpledir_saveconf() {
   $xml_root->addchild('dirpath', $simpledir_conf['dirpath']);
   $xml_root->addchild('urlpath', $simpledir_conf['urlpath']);
   $xml_root->addchild('ignore', implode(',', $simpledir_conf['ignore']));
-  
+
   if ($xml_root->asXML($configfile) === FALSE) {
 	exit('Error saving ' . $configfile . ', check folder privlidges.');
   }
@@ -106,7 +106,7 @@ function simpledir_saveconf() {
 ***********************************************************************************/
 function simpledir_config() {
   global $simpledir_conf;
-  
+
   if (isset($_POST) && sizeof($_POST)>0) {
     /* Save Settings */
     if (isset($_POST['dirpath'])) {
@@ -118,7 +118,7 @@ function simpledir_config() {
     if (isset($_POST['ignore'])) {
       $simpledir_conf['ignore'] = explode(',', urldecode($_POST['ignore']));
     }
-	
+
     simpledir_saveconf();
     $simpledir_conf = simpledir_loadconf();
 
@@ -135,17 +135,17 @@ function simpledir_config() {
 
   echo '<h3>SimpleDir Plugin Settings</h3>';
   echo '<form name="settings" action="load.php?id=simpledir" method="post">';
-  
+
   echo '<label>Full Server Path to Directory (example <i>/home/user/data/uploads/):</i></label>';
-  echo '<p><input class="text" name="dirpath" type="text" size="90" value="' . $simpledir_conf['dirpath'] .'"></p>';      
+  echo '<p><input class="text" name="dirpath" type="text" size="90" value="' . $simpledir_conf['dirpath'] .'"></p>';
 
   echo '<label>Base URL for Directory (example <i>/data/uploads/)</i>:</label>';
-  echo '<p><input class="text" name="urlpath" type="text" size="90" value="' . $simpledir_conf['urlpath'] .'"></p>';      
-  
-  echo '<label>Extensions to Ignore (comma separated, no spaces. Example <i>php,txt</i>:</label>';
-  echo '<p><input class="text" name="ignore" type="text" size="90" value="' . implode(',',$simpledir_conf['ignore']) .'"></p>';   
+  echo '<p><input class="text" name="urlpath" type="text" size="90" value="' . $simpledir_conf['urlpath'] .'"></p>';
 
-      
+  echo '<label>Extensions to Ignore (comma separated, no spaces. Example <i>php,txt</i>:</label>';
+  echo '<p><input class="text" name="ignore" type="text" size="90" value="' . implode(',',$simpledir_conf['ignore']) .'"></p>';
+
+
   echo "<input name='submit_settings' class='submit' type='submit' value='" . i18n_r('BTN_SAVESETTINGS') . "'><br />";
   echo '</form>';
   echo '<br /><p><i>Insert (% simpledir %) as the page content where you wish the directory to appear.  Don\'t forget to modify the CSS using the included CSS file as a guide.</i></p>';
@@ -192,6 +192,10 @@ function simpledir_display_callback($matches) {
 
   if (isset($args['order'])) {
     $params['order'] = $args['order'];
+  }
+
+  if (isset($args['columns'])) {
+    $params['columns'] = explode(',', $args['columns']);
   }
 
   return return_simpledir_display($params);
@@ -310,11 +314,13 @@ function return_simpledir_display($params = array()) {
   global $SITEURL;
 
   // Default parameters
+  $defaultColumns = array('name', 'date', 'type', 'size');
   $params = array_merge(array(
     'dirpath' => null,
     'urlpath' => null,
     'ignore'  => array(),
     'key'     => 'subdir',
+    'columns' => array('name', 'date', 'size'),
   ), $params);
 
   $dirpath = $params['dirpath'];
@@ -347,9 +353,9 @@ function return_simpledir_display($params = array()) {
   }
 
   if ($currentdir == "") {
-    $simpledir_dir = $simpledir_conf['dirpath'];	
+    $simpledir_dir = $simpledir_conf['dirpath'];
   } else {
-    $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;	
+    $simpledir_dir = $simpledir_conf['dirpath'] . $currentdir;
   }
 
   $list = return_simpledir_results(array_merge($params, array(
@@ -381,8 +387,24 @@ function return_simpledir_display($params = array()) {
     $simpledir_content .= '<caption>Subdirectory Listing for ' . $currentdir . '</caption>';
   }
 
-  $simpledir_content .= '<thead><tr><th>Name</th><th>Date</th><th>Size</th></tr></head>';
-  
+  // Columns
+  $columns = array_intersect($defaultColumns, $params['columns']);
+  $simpledir_content .= '<thead><tr>';
+
+  if (in_array('name', $columns)) {
+    $simpledir_content .= '<th>Name</th>';
+  }
+
+  if (in_array('date', $columns)) {
+    $simpledir_content .= '<th>Date</th>';
+  }
+
+  if (in_array('size', $columns)) {
+    $simpledir_content .= '<th>Size</th>';
+  }
+
+  $simpledir_content .= '</tr></thead>';
+
   // generate listing:
   $simpledir_content .= '<tbody>';
 
@@ -394,11 +416,26 @@ function return_simpledir_display($params = array()) {
     $parentdir = ($parentdir == '.') ? '' : $parentdir;
 
     $query[$key] = $parentdir;
-    $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td><td colspan="3"></td></tr>';
+
+    $simpledir_content .= '<tr' . $rowclass . '>';
+
+    if (in_array('name', $columns)) {
+      $simpledir_content .= '<td><a href="' . $current_url .  '?' . http_build_query($query)
+                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td>';
+    }
+
+    if (in_array('date', $columns)) {
+      $simpledir_content .= '<td></td>';
+    }
+
+    if (in_array('size', $columns)) {
+      $simpledir_content .= '<td></td>';
+    }
+
+    $simpledir_content .= '</tr>';
     $rowclass=' class="alt"';
   }
-    
+
 
   // subdirectories
   $filecount = count($subdirarray);
@@ -406,33 +443,64 @@ function return_simpledir_display($params = array()) {
   if ($filecount > 0) {
     foreach ($subdirarray as $file) {
       $query[$key] = $currentdir . $file['name'];
-      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td><td colspan="2">' . $file['date'] . '</td></tr>';
+
+      $simpledir_content .= '<tr' . $rowclass . '>';
+
+      if (in_array('name', $columns)) {
+        $simpledir_content .= '<td><a href="' . $current_url .  '?' . http_build_query($query)
+                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td>';
+      }
+
+      if (in_array('date', $columns)) {
+        $simpledir_content .= '<td>' . $file['date'] . '</td>';
+      }
+
+      if (in_array('size', $columns)) {
+        $simpledir_content .= '<td></td>';
+      }
+
+      $simpledir_content .= '</tr>';
+
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
         $rowclass="";
       }
     }
-  }      
+  }
 
   // files
   $filecount = count($filearray);
 
   if ($filecount > 0) {
     foreach ($filearray as $file) {
-      $simpledir_content .= '<tr' . $rowclass . '><td><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
+      $simpledir_content .= '<tr' . $rowclass . '>';
+
+      if (in_array('name', $columns)) {
+        $simpledir_content .= '<td><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
 	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
-                         . '</a></td><td>' . $file['date'] . '</td><td>' . simpledir_format_bytes($file['size']) . '</td></tr>';
+             . '</a></td>';
+      }
+
+      if (in_array('date', $columns)) {
+        $simpledir_content .= '<td>' . $file['date'] . '</td>';
+      }
+
+      if (in_array('size', $columns)) {
+        $simpledir_content .= '<td>' . simpledir_format_bytes($file['size']) . '</td>';
+      }
+
+      $simpledir_content .= '</tr>';
+
       if ($rowclass=="") {
         $rowclass=' class="alt"';
       } else {
         $rowclass="";
       }
     }
-  }      
+  }
 
-  $simpledir_content .= '<tr' . $rowclass . '><td colspan="3">';
+  $simpledir_content .= '<tr' . $rowclass . '><td colspan="100%">';
 
   if ($filecount==1) {
     $simpledir_content .= $filecount . ' file';
@@ -441,7 +509,7 @@ function return_simpledir_display($params = array()) {
   }
 
   $simpledir_content .= ' totaling ' . simpledir_format_bytes($list['total']) . ' </td></tr>';
-  $simpledir_content .= '</tbody></table><br />';  
+  $simpledir_content .= '</tbody></table>';
 
   return $simpledir_content;
 }
