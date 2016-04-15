@@ -32,6 +32,8 @@ Additional parameters for the `(% simpledir %)` shortcode:
 * `urlpath`: path relative to the global URL path for the subdirectories.
 * `ignore`: comma separated list (no spaces) of extensions to ignore, e.g. `php,htaccess`.  Leave empty to use value given in admin panel.
 * `key`: alphanumeric identifier (used in the URL query string) to distinguish this instance of SimpleDir, e.g. `subdir2`. Needed if you have multiple instances of SimpleDir on the same page.
+* `columns`: comma separated list (no spaces) of columns to include, e.g. `name,date,size`. Leave empty to default to `name,date,size`.
+* `order`: +/- for ascending/descending, followed by column to sort on, e.g. `-date` for latest file first. Leave empty for `+name`.
 
 ### Example
 ```
@@ -53,6 +55,8 @@ Additional parameters for the `(% simpledir %)` shortcode:
   * `urlpath`: same as `urlpath` above.
   * `ignore`: array of extensions to ignore, e.g. `array('php', 'htaccess')`
   * `key`: same as `key` above.
+  * `columns`: same as above, but an array.
+  * `order`: same as above.
 
 ## Public functions
 * `return_simpledir_display($params = array())`: returns a string of the table. Same arguments as `get_simpledir_display`
@@ -61,6 +65,7 @@ Additional parameters for the `(% simpledir %)` shortcode:
     * `dirpath`: same as `dirpath` above.
     * `urlpath`: same as `urlpath` above.
     * `ignore`: same as `ignore` above.
+    * `order`: same as above.
   * Returned is an array with the following keys:
     * `subdirs` : array of subdirectories; each an associative array with keys `name`, `date`
     * `files`: array of files, each an associative array with keys `name`, `date`, `size`, `type`
