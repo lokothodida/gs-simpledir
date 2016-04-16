@@ -34,6 +34,9 @@ Additional parameters for the `(% simpledir %)` shortcode:
 * `key`: alphanumeric identifier (used in the URL query string) to distinguish this instance of SimpleDir, e.g. `subdir2`. Needed if you have multiple instances of SimpleDir on the same page.
 * `columns`: comma separated list (no spaces) of columns to include, e.g. `name,date,size`. Leave empty to default to `name,date,size`.
 * `order`: +/- for ascending/descending, followed by column to sort on, e.g. `-date` for latest file first. Leave empty for `+name`.
+* `showfilter`: set to `true` to show a search field for filtering files in the current directory
+* `showinitial`: number of files to show initially. Set to `0` to show all
+* `sortable`: set to `true` to allow user to sort files by column
 
 ### Example
 ```
@@ -57,6 +60,9 @@ Additional parameters for the `(% simpledir %)` shortcode:
   * `key`: same as `key` above.
   * `columns`: same as above, but an array.
   * `order`: same as above.
+  * `showfilter`: same as above.
+  * `showinitial`: same as above.
+  * `sortable`: same as above.
 
 ## Public functions
 * `return_simpledir_display($params = array())`: returns a string of the table. Same arguments as `get_simpledir_display`
