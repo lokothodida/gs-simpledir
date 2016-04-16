@@ -29,6 +29,14 @@ $simpledir_conf = simpledir_loadconf();
 add_filter('content','simpledir_display');
 add_action('plugins-sidebar','createSideMenu',array($thisfile,'SimpleDir Settings'));
 
+// CSS/JS
+register_style('jquery-datatables', 'https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css', null, 'screen');
+register_script('jquery-datatables', 'https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js', null, FALSE);
+
+queue_style('jquery-datatables', GSFRONT);
+queue_script('jquery', GSFRONT);
+queue_script('jquery-datatables', GSFRONT);
+
 /***********************************************************************************
 *
 * Helper functions
@@ -198,6 +206,18 @@ function simpledir_display_callback($matches) {
     $params['columns'] = explode(',', $args['columns']);
   }
 
+  if (isset($args['showinitial'])) {
+    $params['showinitial'] = (int) $args['showinitial'];
+  }
+
+  if (isset($args['showfilter'])) {
+    $params['showfilter'] = strtolower($args['showfilter']) == 'true';
+  }
+
+  if (isset($args['sortable'])) {
+    $params['sortable'] = strtolower($args['sortable']) == 'true';
+  }
+
   return return_simpledir_display($params);
 }
 
@@ -321,6 +341,9 @@ function return_simpledir_display($params = array()) {
     'ignore'  => array(),
     'key'     => 'subdir',
     'columns' => array('name', 'date', 'size'),
+    'showinitial' => 0,
+    'showfilter'  => false,
+    'sortable'    => false,
   ), $params);
 
   $dirpath = $params['dirpath'];
@@ -379,7 +402,7 @@ function return_simpledir_display($params = array()) {
   $filearray = $list['files'];
   $subdirarray = $list['subdirs'];
 
-  $simpledir_content .= '<table id="sd_table">';
+  $simpledir_content .= '<table class="sd_table ' . $params['key'] . '">';
 
   if ($currentdir == "") {
     $simpledir_content .= '<caption>Directory Listing</caption>';
@@ -500,7 +523,7 @@ function return_simpledir_display($params = array()) {
     }
   }
 
-  $simpledir_content .= '<tr' . $rowclass . '><td colspan="100%">';
+  $simpledir_content .= '</tbody><tfoot><tr><th colspan="' . count($columns) . '">';
 
   if ($filecount==1) {
     $simpledir_content .= $filecount . ' file';
@@ -508,8 +531,30 @@ function return_simpledir_display($params = array()) {
     $simpledir_content .= $filecount . ' files';
   }
 
-  $simpledir_content .= ' totaling ' . simpledir_format_bytes($list['total']) . ' </td></tr>';
-  $simpledir_content .= '</tbody></table>';
+  $simpledir_content .= ' totaling ' . simpledir_format_bytes($list['total']);
+  $simpledir_content .= '</th></tr></tfoot></table>';
+
+  // Configuration for DataTable
+  $datatable = array();
+  $datatable['aaSorting'] = array();
+  $datatable['lengthMenu'] = array(5, 10, 25, 50, 75, 100);
+  $datatable['bFilter'] = $params['showfilter'];
+  $datatable['bSort'] = $params['sortable'];
+
+  if ($params['showinitial']) {
+    $datatable['pageLength'] = $params['showinitial'];
+    $datatable['bPaginate'] = true;
+  } else {
+    $datatable['bPaginate'] = false;
+  }
+
+  $simpledir_content.= '
+    <script>
+      $(function() {
+        var datatable = $(".sd_table.'. $params['key'] . '").DataTable(' . json_encode($datatable) . ');
+      });
+    </script>
+  ';
 
   return $simpledir_content;
 }
