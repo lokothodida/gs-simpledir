@@ -361,8 +361,10 @@ function return_simpledir_display($params = array()) {
     $currentdir = urldecode($_GET[$key]) . '/';
   }
 
+  $pretty_urls = (string) $GLOBALS['PRETTYURLS'] == '1';
   $current_url = explode('?', $_SERVER["REQUEST_URI"]);
   $current_url = $current_url[0];
+  $current_url = $pretty_urls ? $current_url : '';
 
   // Copy the $_GET parameters to a new variable (used for generating full url correctly)
   $query = array();
@@ -371,7 +373,8 @@ function return_simpledir_display($params = array()) {
     $query[$k] = $v;
   }
 
-  if (isset($query['id'])) {
+  // Remove the id parameter is pretty urls are disabled
+  if (isset($query['id']) && $pretty_urls) {
     unset($query['id']);
   }
 
