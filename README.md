@@ -76,3 +76,8 @@ Additional parameters for the `(% simpledir %)` shortcode:
     * `subdirs` : array of subdirectories; each an associative array with keys `name`, `date`
     * `files`: array of files, each an associative array with keys `name`, `date`, `size`, `type`
     * `total`: total size of the files in this directory
+
+# Credit and Special Thanks
+* [Rob Antonishen](http://ffaat.poweredbyclear.com/) for the original plugin
+* [DesruX](http://get-simple.info/forums/member.php?action=profile&uid=35504) for suggestions and beta testing
+* [DataTables](https://datatables.net/) for the jQuery plugin used give client-side functionality to the directory listing
