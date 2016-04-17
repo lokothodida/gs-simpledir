@@ -470,16 +470,17 @@ function return_simpledir_display($params = array()) {
       $simpledir_content .= '<tr' . $rowclass . '>';
 
       if (in_array('name', $columns)) {
-        $simpledir_content .= '<td><a href="' . $current_url .  '?' . http_build_query($query)
+        // data-order attribute prefix is so sorting by name always does folders before files
+        $simpledir_content .= '<td data-order="f1_' . $file['name'] . '"><a href="' . $current_url .  '?' . http_build_query($query)
                          . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td>';
       }
 
       if (in_array('date', $columns)) {
-        $simpledir_content .= '<td>' . $file['date'] . '</td>';
+        $simpledir_content .= '<td data-order="0">' . $file['date'] . '</td>';
       }
 
       if (in_array('size', $columns)) {
-        $simpledir_content .= '<td></td>';
+        $simpledir_content .= '<td data-order="0"></td>';
       }
 
       $simpledir_content .= '</tr>';
@@ -500,17 +501,17 @@ function return_simpledir_display($params = array()) {
       $simpledir_content .= '<tr' . $rowclass . '>';
 
       if (in_array('name', $columns)) {
-        $simpledir_content .= '<td><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
+        $simpledir_content .= '<td data-order="f2_' . $file['name'] .'"><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
 	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
              . '</a></td>';
       }
 
       if (in_array('date', $columns)) {
-        $simpledir_content .= '<td>' . $file['date'] . '</td>';
+        $simpledir_content .= '<td data-order="' . strtotime($file['date']) . '">' . $file['date'] . '</td>';
       }
 
       if (in_array('size', $columns)) {
-        $simpledir_content .= '<td>' . simpledir_format_bytes($file['size']) . '</td>';
+        $simpledir_content .= '<td data-order="' . $file['size'] . '">' . simpledir_format_bytes($file['size']) . '</td>';
       }
 
       $simpledir_content .= '</tr>';
