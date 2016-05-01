@@ -1,7 +1,6 @@
 <?php
 // Display functions
 function simpledir_display_callback($matches) {
-  global $simpledir_conf;
   $_params = $matches[1];
   $_params = explode(' ', $_params);
   $params = array();
@@ -65,8 +64,6 @@ function simpledir_display_callback($matches) {
 
 // Return the HTML table of files in a directory
 function return_simpledir_display($params = array()) {
-  global $SITEURL;
-
   // Default parameters
   $defaultColumns = array('name', 'date', 'type', 'size');
   $params = array_merge(array(
@@ -184,7 +181,7 @@ function return_simpledir_display($params = array()) {
 
     if (in_array('name', $columns)) {
       $simpledir_content .= '<td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '" title="' . simpledir_i18n('PARENT_DIR') . '"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;' . simpledir_i18n('PARENT_DIR') . '</a></td>';
+                         . '" title="' . simpledir_i18n('PARENT_DIR') . '"><img src="' . SIMPLEDIR_IMGURL . '/upfolder.png" width="16" height="16">&nbsp;' . simpledir_i18n('PARENT_DIR') . '</a></td>';
     }
 
     if (in_array('date', $columns)) {
@@ -242,7 +239,7 @@ function return_simpledir_display($params = array()) {
 
       if (in_array('name', $columns)) {
         $simpledir_content .= '<td data-order="f2_' . $file['name'] .'"><a href="' . $simpledir_conf['urlpath'] . $urlpath . $currentdir . $file['name'] . '">'
-	           . '<img src="' . $SITEURL . 'plugins/simpledir/images/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
+	           . '<img src="' . SIMPLEDIR_IMGURL . '/' . $file['type'] . '.png" width="16" height="16">&nbsp;' . $file['name']
              . '</a></td>';
       }
 
