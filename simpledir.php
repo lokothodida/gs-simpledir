@@ -7,41 +7,39 @@
   Author URI: http://ffaat.poweredbyclear.com/
 */
 
-// Constants
+// == Constants ==
 define('SIMPLEDIR', basename(__FILE__, '.php'));
 define('SIMPLEDIR_PLUGINPATH', GSPLUGINPATH . SIMPLEDIR . '/');
 define('SIMPLEDIR_CONFIGFILE', GSDATAOTHERPATH . 'simpledir.xml');
 define('SIMPLEDIR_PLUGINURL', $SITEURL . 'plugins/' . SIMPLEDIR . '/');
 define('SIMPLEDIR_IMGURL', SIMPLEDIR_PLUGINURL . 'images/');
 
-// get correct id for plugin
-$thisfile = basename(__FILE__, '.php');
-
-// == Common =
+// == Common functions (used throughout plugin) =
 require_once(SIMPLEDIR_PLUGINPATH . 'common_functions.php');
 
 // == Languages ==
 i18n_merge(SIMPLEDIR) || i18n_merge(SIMPLEDIR, 'en_US');
 
-// register plugin
+// == Register plugin ==
 register_plugin(
   SIMPLEDIR,
   simpledir_i18n('PLUGIN_TITLE'),
   '0.4',
-  'Rob Antonishen',
-  'http://ffaat.poweredbyclear.com/',
+  'Lawrence Okoth-Odida',
+  'https://github.com/lokothodida/',
   simpledir_i18n('PLUGIN_DESC'),
   'plugins',
   'simpledir_config'
 );
 
 // == Register actions and filters ==
-// activate filter
-add_filter('content','simpledir_display');
+// Sidebar link
 add_action('plugins-sidebar','createSideMenu', array(SIMPLEDIR, 'SimpleDir Settings'));
+// Placeholder filter
+add_filter('content','simpledir_display');
 
 // == Register styles and scripts==
-// CSS/JS
+// DataTables
 register_style('jquery-datatables', 'https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css', null, 'screen');
 register_script('jquery-datatables', 'https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js', null, FALSE);
 
@@ -88,12 +86,7 @@ function simpledir_config() {
   include(SIMPLEDIR_PLUGINPATH . 'save_config.php');
 }
 
-
-/***********************************************************************************
-*
-* Frontend display
-*
-***********************************************************************************/
+// Frontend Display
 function simpledir_display($contents) {
   require_once(SIMPLEDIR_PLUGINPATH . 'display_functions.php');
   return preg_replace_callback('/\(% simpledir(.*?)%\)/i', 'simpledir_display_callback', $contents);

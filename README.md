@@ -37,6 +37,9 @@ Additional parameters for the `(% simpledir %)` shortcode:
 * `showfilter`: set to `true` to show a search field for filtering files in the current directory
 * `showinitial`: number of files to show initially. Set to `0` to show all
 * `sortable`: set to `true` to allow user to sort files by column
+* `LABEL_NAME`: label for the `Name` column
+* `LABEL_SIZE`: label for the `Size` column
+* `LABEL_DATE`: label for the `Date` column
 
 ### Example
 ```
@@ -63,6 +66,7 @@ Additional parameters for the `(% simpledir %)` shortcode:
   * `showfilter`: same as above.
   * `showinitial`: same as above.
   * `sortable`: same as above.
+  * `LABEL_[NAME]` : same as above.
 
 ## Public functions
 * `return_simpledir_display($params = array())`: returns a string of the table. Same arguments as `get_simpledir_display`
