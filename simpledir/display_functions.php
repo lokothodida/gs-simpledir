@@ -2,7 +2,7 @@
 // Display functions
 function simpledir_display_callback($matches) {
   $_params = $matches[1];
-  $_params = explode(' ', $_params);
+  $_params = explode('|', $_params);
   $params = array();
   $args = array();
 

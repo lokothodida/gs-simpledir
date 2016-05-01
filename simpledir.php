@@ -34,7 +34,7 @@ register_plugin(
 
 // == Register actions and filters ==
 // Sidebar link
-add_action('plugins-sidebar','createSideMenu', array(SIMPLEDIR, 'SimpleDir Settings'));
+add_action('plugins-sidebar','createSideMenu', array(SIMPLEDIR, simpledir_i18n('PLUGIN_SIDEBAR')));
 // Placeholder filter
 add_filter('content','simpledir_display');
 

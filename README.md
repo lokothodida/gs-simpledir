@@ -26,7 +26,7 @@ There is also a css file in the `simpledir` subdirectory that can be used as a t
     ```
 
 ## Parameters
-Additional parameters for the `(% simpledir %)` shortcode:
+Additional parameters for the `(% simpledir %)` shortcode (separated by `|`):
 
 * `dirpath`: path relative to global path given in the admin panel.
 * `urlpath`: path relative to the global URL path for the subdirectories.
@@ -47,10 +47,10 @@ Additional parameters for the `(% simpledir %)` shortcode:
 (% simpledir key="subdir1" %)
 
 // Shows all files in /data/uploads/images
-(% simpledir key="subdir2" dirpath="images/" urlpath="images/" %)
+(% simpledir key="subdir2" | dirpath="images/" | urlpath="images/" %)
 
 // Shows all non-png files in data/uploads/
-(% simpledir key="subdir3" ignore="png" %)
+(% simpledir key="subdir3" | ignore="png" %)
 ```
 
 # API
