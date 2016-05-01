@@ -44,18 +44,14 @@ function simpledir_loadconf() {
 }
 
 /* save config settings to file*/
-function simpledir_saveconf($data) {
-  global $simpledir_conf;
-  $configfile=GSDATAOTHERPATH . 'simpledir.xml';
-
+function simpledir_saveconf($simpledir_conf) {
+  // Build the XML
   $xml_root = new SimpleXMLElement('<settings></settings>');
   $xml_root->addchild('dirpath', $simpledir_conf['dirpath']);
   $xml_root->addchild('urlpath', $simpledir_conf['urlpath']);
   $xml_root->addchild('ignore', implode(',', $simpledir_conf['ignore']));
 
-  if ($xml_root->asXML($configfile) === FALSE) {
-	  //exit('Error saving ' . $configfile . ', check folder privlidges.');
-  }
+  return $xml_root->asXML(SIMPLEDIR_CONFIGFILE);
 }
 
 // Get an array of the files/subdirs in a directory

@@ -53,50 +53,40 @@ queue_script('jquery-datatables', GSFRONT);
 // == Functions ==
 // Admin Panel
 function simpledir_config() {
-  global $simpledir_conf;
+  // Load admin functions
+  include(SIMPLEDIR_PLUGINPATH . 'admin_functions.php');
 
-  if (isset($_POST) && sizeof($_POST)>0) {
-    /* Save Settings */
+  // Process POST form
+  if (!empty($_POST)) {
+    $data = array();
+
+    // Validation
     if (isset($_POST['dirpath'])) {
-      $simpledir_conf['dirpath'] = urldecode($_POST['dirpath']);
+      $data['dirpath'] = urldecode($_POST['dirpath']);
     }
+
     if (isset($_POST['urlpath'])) {
-      $simpledir_conf['urlpath'] = urldecode($_POST['urlpath']);
+      $data['urlpath'] = urldecode($_POST['urlpath']);
     }
+
     if (isset($_POST['ignore'])) {
-      $simpledir_conf['ignore'] = explode(',', urldecode($_POST['ignore']));
+      $data['ignore'] = explode(',', urldecode($_POST['ignore']));
     }
 
-    simpledir_saveconf();
-    $simpledir_conf = simpledir_loadconf();
+    $succ = simpledir_saveconf($data);
 
-    echo
-    '<script type="text/javascript">
-      $(function() {
-        var msg = ' . json_encode(i18n_r('SETTINGS_UPDATED')) . ';
-        $("div.bodycontent").before(
-          "<div class=\"updated\" style=\"display:block;\">" + msg + "</div>");
-        $(".updated, .error").fadeOut(500).fadeIn(500);
-      });
-    </script>';
+    if ($succ) {
+      simpledir_admin_message('updated', i18n_r('SETTINGS_UPDATED'));
+    } else {
+      simpledir_admin_message('error', i18n_r('ER_SETTINGS_UPD'));
+    }
   }
 
-  echo '<h3>SimpleDir Plugin Settings</h3>';
-  echo '<form name="settings" action="load.php?id=simpledir" method="post">';
+  // Load config
+  $simpledir_conf = simpledir_loadconf();
 
-  echo '<label>Full Server Path to Directory (example <i>/home/user/data/uploads/):</i></label>';
-  echo '<p><input class="text" name="dirpath" type="text" size="90" value="' . $simpledir_conf['dirpath'] .'"></p>';
-
-  echo '<label>Base URL for Directory (example <i>/data/uploads/)</i>:</label>';
-  echo '<p><input class="text" name="urlpath" type="text" size="90" value="' . $simpledir_conf['urlpath'] .'"></p>';
-
-  echo '<label>Extensions to Ignore (comma separated, no spaces. Example <i>php,txt</i>:</label>';
-  echo '<p><input class="text" name="ignore" type="text" size="90" value="' . implode(',',$simpledir_conf['ignore']) .'"></p>';
-
-
-  echo "<input name='submit_settings' class='submit' type='submit' value='" . i18n_r('BTN_SAVESETTINGS') . "'><br />";
-  echo '</form>';
-  echo '<br /><p><i>Insert (% simpledir %) as the page content where you wish the directory to appear.  Don\'t forget to modify the CSS using the included CSS file as a guide.</i></p>';
+  // Settings Page
+  include(SIMPLEDIR_PLUGINPATH . 'save_config.php');
 }
 
 
