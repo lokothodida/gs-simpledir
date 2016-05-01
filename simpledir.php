@@ -35,9 +35,6 @@ register_plugin(
   'simpledir_config'
 );
 
-# global vars
-$simpledir_conf = simpledir_loadconf();
-
 // == Register actions and filters ==
 // activate filter
 add_filter('content','simpledir_display');
@@ -85,7 +82,7 @@ function simpledir_config() {
   }
 
   // Load config
-  $simpledir_conf = simpledir_loadconf();
+  $simpledir_conf = simpledir_loadconf(true);
 
   // Settings Page
   include(SIMPLEDIR_PLUGINPATH . 'save_config.php');

@@ -85,7 +85,7 @@ function return_simpledir_display($params = array()) {
   $ignore  = $params['ignore'];
   $key     = $params['key'];
 
-  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
+  $simpledir_conf = array_merge(array(), simpledir_loadconf());
   $simpledir_conf['ignore'] = $ignore;
 
   $tmp_content = '';

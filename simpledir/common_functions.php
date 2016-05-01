@@ -8,30 +8,33 @@ function simpledir_format_bytes($size) {
 }
 
 // Get config settings from file
-function simpledir_loadconf() {
+function simpledir_loadconf($refresh = false) {
   // Initialize
   simpledir_init();
 
   // Load the data
-  $vals = false;
-  $configfile = SIMPLEDIR_CONFIGFILE;
+  static $vals = array();
 
-  $xml_root = simplexml_load_file($configfile);
+  if ($refresh || empty($vals)) {
+    $configfile = SIMPLEDIR_CONFIGFILE;
 
-  if ($xml_root !== FALSE) {
-    $vals = array();
-    $node = $xml_root->children();
+    $xml_root = simplexml_load_file($configfile);
 
-    $vals['dirpath'] = (string)$node->dirpath;
-    $vals['urlpath'] = (string)$node->urlpath;
-    $vals['ignore'] =  explode(',', (string)$node->ignore);
+    if ($xml_root !== FALSE) {
+      $vals = array();
+      $node = $xml_root->children();
 
-    if (empty($vals['dirpath'])) {
-      $vals['dirpath'] = GSDATAUPLOADPATH;
-    }
+      $vals['dirpath'] = (string)$node->dirpath;
+      $vals['urlpath'] = (string)$node->urlpath;
+      $vals['ignore'] =  explode(',', (string)$node->ignore);
 
-    if (empty($vals['urlpath'])) {
-      $vals['urlpath'] = '/' . str_replace(GSROOTPATH, '', GSDATAUPLOADPATH);
+      if (empty($vals['dirpath'])) {
+        $vals['dirpath'] = GSDATAUPLOADPATH;
+      }
+
+      if (empty($vals['urlpath'])) {
+        $vals['urlpath'] = '/' . str_replace(GSROOTPATH, '', GSDATAUPLOADPATH);
+      }
     }
   }
 
@@ -90,7 +93,7 @@ function return_simpledir_results($params = array()) {
   $ignore  = $params['ignore'];
 
   // Copy the global $simpledir_conf
-  $simpledir_conf = array_merge(array(), $GLOBALS['simpledir_conf']);
+  $simpledir_conf = array_merge(array(), simpledir_loadconf());
 
   // Merge defaults
   if (!empty($dirpath)) {
