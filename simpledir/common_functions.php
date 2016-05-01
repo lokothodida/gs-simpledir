@@ -1,31 +1,25 @@
 <?php
 // Common functions
+// Formatting for bytes
 function simpledir_format_bytes($size) {
   $units = array('B', 'KB', 'MB', 'GB', 'TB');
   for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
   return round($size, 2).$units[$i];
 }
 
-/* get config settings from file */
+// Get config settings from file
 function simpledir_loadconf() {
-  $vals=array();
-  $configfile=GSDATAOTHERPATH . 'simpledir.xml';
-  if (!file_exists($configfile)) {
-    //default settings
-    $xml_root = new SimpleXMLElement('<settings><dirpath>' . GSDATAUPLOADPATH . '</dirpath><urlpath>' . str_replace(GSROOTPATH, '', '/' . GSDATAUPLOADPATH) . '</urlpath><ignore>php</ignore></settings>');
-    if ($xml_root->asXML($configfile) === FALSE) {
-	  exit('Error saving ' . $configfile . ', check folder privlidges.');
-    }
-    if (defined('GSCHMOD')) {
-	  chmod($configfile, GSCHMOD);
-    } else {
-      chmod($configfile, 0755);
-    }
-  }
+  // Initialize
+  simpledir_init();
+
+  // Load the data
+  $vals = false;
+  $configfile = SIMPLEDIR_CONFIGFILE;
 
   $xml_root = simplexml_load_file($configfile);
 
   if ($xml_root !== FALSE) {
+    $vals = array();
     $node = $xml_root->children();
 
     $vals['dirpath'] = (string)$node->dirpath;
@@ -40,10 +34,37 @@ function simpledir_loadconf() {
       $vals['urlpath'] = '/' . str_replace(GSROOTPATH, '', GSDATAUPLOADPATH);
     }
   }
-  return($vals);
+
+  return $vals;
 }
 
-/* save config settings to file*/
+// Initialize the plugin
+function simpledir_init() {
+  $configfile = SIMPLEDIR_CONFIGFILE;
+  $succ = true;
+
+  if (!file_exists($configfile)) {
+    // Initialize the file
+    $succ = simpledir_saveconf(array(
+      'dirpath' => GSDATAUPLOADPATH,
+      'urlpath' => str_replace(GSROOTPATH, '', '/' . GSDATAUPLOADPATH),
+      'ignore'  => 'php',
+    ));
+
+    // Ensure file permissions are correct
+    if ($succ) {
+      if (defined('GSCHMOD')) {
+        $succ = chmod($configfile, GSCHMOD);
+      } else {
+        $succ = chmod($configfile, 0755);
+      }
+    }
+  }
+
+  return $succ;
+}
+
+// Save config settings to file
 function simpledir_saveconf($simpledir_conf) {
   // Build the XML
   $xml_root = new SimpleXMLElement('<settings></settings>');

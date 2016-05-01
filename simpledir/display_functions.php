@@ -2,51 +2,55 @@
 // Display functions
 function simpledir_display_callback($matches) {
   global $simpledir_conf;
-  $params = $matches[1];
-  $params = explode(' ', $params);
+  $_params = $matches[1];
+  $_params = explode(' ', $_params);
+  $params = array();
   $args = array();
 
-  foreach ($params as $param) {
+  foreach ($_params as $param) {
     $param = explode('=', $param);
-    $key = trim($param[0]);
-    $value = isset($param[1]) ? trim(strtolower($param[1]), '"') : null;
-    $args[$key] = $value;
+    $key = trim($param[0], '" ');
+
+    if (isset($param[1])) {
+      $value = trim($param[1], '" ');
+      $params[$key] = $value;
+    }
   }
 
-  if (isset($args['dirpath'])) {
-    $params['dirpath'] = $args['dirpath'];
+  if (isset($params['dirpath'])) {
+    $params['dirpath'] = $params['dirpath'];
   }
 
-  if (isset($args['urlpath'])) {
-    $params['urlpath'] = $args['urlpath'];
+  if (isset($params['urlpath'])) {
+    $params['urlpath'] = $params['urlpath'];
   }
 
-  if (isset($args['ignore'])) {
-    $params['ignore'] = explode(',', $args['ignore']);
+  if (isset($params['ignore'])) {
+    $params['ignore'] = explode(',', $params['ignore']);
   }
 
-  if (isset($args['key'])) {
-    $params['key'] = $args['key'];
+  if (isset($params['key'])) {
+    $params['key'] = $params['key'];
   }
 
-  if (isset($args['order'])) {
-    $params['order'] = $args['order'];
+  if (isset($params['order'])) {
+    $params['order'] = $params['order'];
   }
 
-  if (isset($args['columns'])) {
-    $params['columns'] = explode(',', $args['columns']);
+  if (isset($params['columns'])) {
+    $params['columns'] = explode(',', $params['columns']);
   }
 
-  if (isset($args['showinitial'])) {
-    $params['showinitial'] = (int) $args['showinitial'];
+  if (isset($params['showinitial'])) {
+    $params['showinitial'] = (int) $params['showinitial'];
   }
 
-  if (isset($args['showfilter'])) {
-    $params['showfilter'] = strtolower($args['showfilter']) == 'true';
+  if (isset($params['showfilter'])) {
+    $params['showfilter'] = strtolower($params['showfilter']) == 'true';
   }
 
-  if (isset($args['sortable'])) {
-    $params['sortable'] = strtolower($args['sortable']) == 'true';
+  if (isset($params['sortable'])) {
+    $params['sortable'] = strtolower($params['sortable']) == 'true';
   }
 
   return return_simpledir_display($params);
@@ -74,6 +78,9 @@ function return_simpledir_display($params = array()) {
     'showinitial' => 0,
     'showfilter'  => false,
     'sortable'    => false,
+    'LABEL_NAME'  => simpledir_i18n('LABEL_NAME'),
+    'LABEL_SIZE'  => simpledir_i18n('LABEL_SIZE'),
+    'LABEL_DATE'  => simpledir_i18n('LABEL_DATE'),
   ), $params);
 
   $dirpath = $params['dirpath'];
@@ -138,9 +145,9 @@ function return_simpledir_display($params = array()) {
   $simpledir_content .= '<table class="sd_table ' . $params['key'] . '">';
 
   if ($currentdir == "") {
-    $simpledir_content .= '<caption>Directory Listing</caption>';
+    $simpledir_content .= '<caption>' . simpledir_i18n('DIR_LIST') . '</caption>';
   } else {
-    $simpledir_content .= '<caption>Subdirectory Listing for ' . $currentdir . '</caption>';
+    $simpledir_content .= '<caption>' . (str_replace('%s', $currentdir, simpledir_i18n('SUBDIR_LIST'))) . '</caption>';
   }
 
   // Columns
@@ -148,15 +155,15 @@ function return_simpledir_display($params = array()) {
   $simpledir_content .= '<thead><tr>';
 
   if (in_array('name', $columns)) {
-    $simpledir_content .= '<th>Name</th>';
+    $simpledir_content .= '<th>' . $params['LABEL_NAME'] . '</th>';
   }
 
   if (in_array('date', $columns)) {
-    $simpledir_content .= '<th>Date</th>';
+    $simpledir_content .= '<th>' . $params['LABEL_DATE'] . '</th>';
   }
 
   if (in_array('size', $columns)) {
-    $simpledir_content .= '<th>Size</th>';
+    $simpledir_content .= '<th>' . $params['LABEL_SIZE'] . '</th>';
   }
 
   $simpledir_content .= '</tr></thead>';
@@ -177,7 +184,7 @@ function return_simpledir_display($params = array()) {
 
     if (in_array('name', $columns)) {
       $simpledir_content .= '<td><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '" title="Parent Directory"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;Parent Directory</a></td>';
+                         . '" title="' . simpledir_i18n('PARENT_DIR') . '"><img src="' . $SITEURL . 'plugins/simpledir/images/upfolder.png" width="16" height="16">&nbsp;' . simpledir_i18n('PARENT_DIR') . '</a></td>';
     }
 
     if (in_array('date', $columns)) {
@@ -205,7 +212,7 @@ function return_simpledir_display($params = array()) {
       if (in_array('name', $columns)) {
         // data-order attribute prefix is so sorting by name always does folders before files
         $simpledir_content .= '<td data-order="f1_' . $file['name'] . '"><a href="' . $current_url .  '?' . http_build_query($query)
-                         . '"><img src="' . $SITEURL . 'plugins/simpledir/images/folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td>';
+                         . '"><img src="' . SIMPLEDIR_IMGURL . 'folder.png" width="16" height="16">&nbsp;' . $file['name'] . '</a></td>';
       }
 
       if (in_array('date', $columns)) {

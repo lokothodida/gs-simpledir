@@ -11,6 +11,8 @@
 define('SIMPLEDIR', basename(__FILE__, '.php'));
 define('SIMPLEDIR_PLUGINPATH', GSPLUGINPATH . SIMPLEDIR . '/');
 define('SIMPLEDIR_CONFIGFILE', GSDATAOTHERPATH . 'simpledir.xml');
+define('SIMPLEDIR_PLUGINURL', $SITEURL . 'plugins/' . SIMPLEDIR . '/');
+define('SIMPLEDIR_IMGURL', SIMPLEDIR_PLUGINURL . 'images/');
 
 // get correct id for plugin
 $thisfile = basename(__FILE__, '.php');
